@@ -5,21 +5,20 @@
 #ifndef QRB_ROS_IMU__IMU_COMPONENT_HPP_
 #define QRB_ROS_IMU__IMU_COMPONENT_HPP_
 
-#include <qrb_ros_imu/imu_type_adapter.hpp>
-#include <sensor_msgs/msg/imu.hpp>
 #include <thread>
 
+#include "qrb_ros_transport/type/imu.hpp"
+#include "qrb_sensor_client/sensor_client.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "sensor_client.h"
 
 #define TOPIC_NAME "imu"
-#define TOPIC_TYPE qrb::ros::ImuTypeAdapter
+#define TOPIC_TYPE qrb_ros::transport::type::Imu
 #define RETRY_MAX 30
 #define RETRY_INTERVAL 2  // 2s
 
-namespace qrb
+namespace qrb_ros
 {
-namespace ros
+namespace imu
 {
 class ImuComponent : public rclcpp::Node
 {
@@ -33,7 +32,7 @@ private:
   void connect_success();
   void retry_connection();
   void publish_msg();
-  SensorClient sensor_client_;
+  qrb::sensor_client::SensorClient sensor_client_;
   rclcpp::Publisher<TOPIC_TYPE>::SharedPtr publisher_;
   bool debug_ = false;
   bool running_;
@@ -42,7 +41,7 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
 };
 
-}  // namespace ros
-}  // namespace qrb
+}  // namespace imu
+}  // namespace qrb_ros
 
 #endif

@@ -7,16 +7,13 @@
 #include <chrono>
 #include <functional>
 #include <memory>
-#include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/imu.hpp>
 #include <thread>
 
-#include "qrb_ros_imu/imu_type_adapter.hpp"
-#include "sensor_client.h"
+#include "rclcpp/rclcpp.hpp"
 
-namespace qrb
+namespace qrb_ros
 {
-namespace ros
+namespace imu
 {
 ImuComponent::ImuComponent(const rclcpp::NodeOptions& options) : Node("imu_node", options)
 {
@@ -47,8 +44,8 @@ bool ImuComponent::init()
 {
   if (!sensor_client_.CreateConnection()) {
     RCLCPP_ERROR(this->get_logger(), "imu client connect failed.");
-    timer_ = this->create_wall_timer(std::chrono::seconds(RETRY_INTERVAL),
-                                     std::bind(&ImuComponent::retry_connection, this));
+    timer_ = this->create_wall_timer(
+        std::chrono::seconds(RETRY_INTERVAL), std::bind(&ImuComponent::retry_connection, this));
     return false;
   }
 
@@ -79,8 +76,8 @@ void ImuComponent::retry_connection()
     return;
   } else {
     RCLCPP_ERROR(this->get_logger(), "reconnect service failed");
-    RCLCPP_ERROR(this->get_logger(), "retry %d/%d after %d seconds...", ++retry_, RETRY_MAX,
-                 RETRY_INTERVAL);
+    RCLCPP_ERROR(
+        this->get_logger(), "retry %d/%d after %d seconds...", ++retry_, RETRY_MAX, RETRY_INTERVAL);
   }
   if (retry_ >= RETRY_MAX) {
     RCLCPP_ERROR(this->get_logger(), "reconnect service failed");
@@ -95,7 +92,6 @@ void ImuComponent::publish_msg()
   int i = 0;
   sensors_event_t* accel_ptr;
   sensors_event_t* gyro_ptr;
-  std::unique_ptr<qrb::ros::ImuTypeAdapter> container;
   long time_nanosec;
   long long latency_sum = 0;
 
@@ -111,7 +107,17 @@ void ImuComponent::publish_msg()
       continue;
     }
     for (i = 0; i < pack_num; i++) {
-      container = std::make_unique<qrb::ros::ImuTypeAdapter>(*accel_ptr, *gyro_ptr);
+      auto container = std::make_unique<qrb_ros::transport::type::Imu>();
+      std::shared_ptr<sensors_event_t> accel(accel_ptr, [](sensors_event_t* /* p */) {
+        // due to use cycle buffer, no need to release
+      });
+      std::shared_ptr<sensors_event_t> gyro(gyro_ptr, [](sensors_event_t* /* p */) {
+        // due to use cycle buffer, no need to release
+      });
+      container->acceleration = accel;
+      container->gyro = gyro;
+      container->header.stamp.sec = accel_ptr->timestamp / 1000000000LL;
+      container->header.stamp.nanosec = accel_ptr->timestamp % 1000000000LL;
       if (debug_) {
         time_nanosec = (get_clock()->now()).nanoseconds();
         if (accel_ptr->timestamp > gyro_ptr->timestamp) {
@@ -131,9 +137,9 @@ void ImuComponent::publish_msg()
     }
   }
 }
-}  // namespace ros
-}  // namespace qrb
+}  // namespace imu
+}  // namespace qrb_ros
 
 #include "rclcpp_components/register_node_macro.hpp"
 
-RCLCPP_COMPONENTS_REGISTER_NODE(qrb::ros::ImuComponent)
+RCLCPP_COMPONENTS_REGISTER_NODE(qrb_ros::imu::ImuComponent)

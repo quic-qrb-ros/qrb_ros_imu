@@ -8,43 +8,42 @@
 #include <rclcpp/rclcpp.hpp>
 #include <string>
 
-#include "qrb_ros_imu/imu_type_adapter.hpp"
+#include "qrb_ros_transport/type/imu.hpp"
 
-namespace qrb
+namespace qrb_ros
 {
-namespace ros
+namespace imu
 {
 class ImuListener : public rclcpp::Node
 {
 public:
   explicit ImuListener(const rclcpp::NodeOptions& options) : Node("imu_test", options)
   {
-    auto callback = [this](const qrb::ros::ImuTypeAdapter& container) {
+    auto callback = [this](const std::shared_ptr<const qrb_ros::transport::type::Imu> container) {
       long time_nanosec = (get_clock()->now()).nanoseconds();
       long receive_nanosec =
-          container.header.stamp.sec * 1000000000LL + container.header.stamp.nanosec;
+          container->header.stamp.sec * 1000000000LL + container->header.stamp.nanosec;
       RCLCPP_INFO(this->get_logger(), "receive imu data time: %ld", receive_nanosec);
       RCLCPP_INFO(this->get_logger(), "imu accel data x: %f, y: %f, z:%f",
-                  container.sensor_ptr[0].acceleration.x, container.sensor_ptr[0].acceleration.y,
-                  container.sensor_ptr[0].acceleration.z);
-      RCLCPP_INFO(this->get_logger(), "imu gyro data x: %f, y: %f, z:%f",
-                  container.sensor_ptr[1].gyro.x, container.sensor_ptr[1].gyro.y,
-                  container.sensor_ptr[1].gyro.z);
-      RCLCPP_INFO(this->get_logger(), "receive imu data latency: %ld ns",
-                  time_nanosec - receive_nanosec);
+          container->acceleration->acceleration.x, container->acceleration->acceleration.y,
+          container->acceleration->acceleration.z);
+      RCLCPP_INFO(this->get_logger(), "imu gyro data x: %f, y: %f, z:%f", container->gyro->gyro.x,
+          container->gyro->gyro.y, container->gyro->gyro.z);
+      RCLCPP_INFO(
+          this->get_logger(), "receive imu data latency: %ld ns", time_nanosec - receive_nanosec);
     };
     RCLCPP_INFO(this->get_logger(), "Subscribing to topic: imu");
     rclcpp::SubscriptionOptions sub_options;
     sub_options.use_intra_process_comm = rclcpp::IntraProcessSetting::Enable;
 
-    sub_ = create_subscription<qrb::ros::ImuTypeAdapter>("imu", 40, callback, sub_options);
+    sub_ = create_subscription<qrb_ros::transport::type::Imu>("imu", 40, callback, sub_options);
   }
 
 private:
-  rclcpp::Subscription<qrb::ros::ImuTypeAdapter>::SharedPtr sub_;
+  rclcpp::Subscription<qrb_ros::transport::type::Imu>::SharedPtr sub_;
 };
-}  // namespace ros
-}  // namespace qrb
+}  // namespace imu
+}  // namespace qrb_ros
 
 int main(int argc, char* argv[])
 {
@@ -53,7 +52,7 @@ int main(int argc, char* argv[])
   rclcpp::executors::SingleThreadedExecutor exec;
   rclcpp::NodeOptions options;
 
-  auto test_node = std::make_shared<qrb::ros::ImuListener>(options);
+  auto test_node = std::make_shared<qrb_ros::imu::ImuListener>(options);
   exec.add_node(test_node);
   exec.spin();
 
@@ -63,4 +62,4 @@ int main(int argc, char* argv[])
 
 #include "rclcpp_components/register_node_macro.hpp"
 
-RCLCPP_COMPONENTS_REGISTER_NODE(qrb::ros::ImuListener)
+RCLCPP_COMPONENTS_REGISTER_NODE(qrb_ros::imu::ImuListener)

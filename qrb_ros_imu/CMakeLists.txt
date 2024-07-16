@@ -19,39 +19,20 @@ endif()
 
 include_directories (./include)
 
+
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
-
 ament_auto_add_library(${PROJECT_NAME} SHARED
   src/imu_component.cpp
-  src/imu_type_adapter.cpp
-)
-
-ament_auto_add_library(${PROJECT_NAME}_test SHARED
-  src/imu_test.cpp
-  src/imu_type_adapter.cpp
 )
 
 ament_auto_add_executable(imu_node
   src/imu_node.cpp
 )
 
-ament_auto_add_executable(imu_test
-  src/imu_test.cpp
-  src/imu_type_adapter.cpp
-)
-
 rclcpp_components_register_nodes(${PROJECT_NAME}
-  PLUGIN "qrb::ros::ImuComponent"
-)
-
-rclcpp_components_register_nodes(${PROJECT_NAME}_test
-  PLUGIN "qrb::ros::ImuListener"
-)
-
-target_link_libraries(${PROJECT_NAME}
-  sensor_client
+  PLUGIN "qrb_ros::imu::ImuComponent"
 )
 
 target_link_libraries(imu_node
@@ -59,11 +40,17 @@ target_link_libraries(imu_node
 )
 
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
+  ament_auto_add_library(${PROJECT_NAME}_test SHARED
+    test/src/imu_test.cpp
+  )
 
-  find_package(launch_testing_ament_cmake REQUIRED)
-  add_launch_test(test/qrb_ros_imu.py)
+  ament_auto_add_executable(imu_test
+    test/src/imu_test.cpp
+  )
+
+  rclcpp_components_register_nodes(${PROJECT_NAME}_test
+    PLUGIN "qrb_ros::imu::ImuListener"
+  )
 endif()
 
-ament_auto_package()
+ament_auto_package(INSTALL_TO_SHARE launch)

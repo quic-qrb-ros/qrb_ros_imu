@@ -11,7 +11,7 @@ def generate_test_description():
     imu_node = ComposableNode(
         name='imu',
         package='qrb_ros_imu',
-        plugin='qrb::ros::ImuComponent'
+        plugin='qrb_ros::imu::ImuComponent'
     )
 
     container = ComposableNodeContainer(

@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
   rclcpp::init(argc, argv);
   rclcpp::NodeOptions options;
   rclcpp::executors::SingleThreadedExecutor exec;
-  auto node = std::make_shared<qrb::ros::ImuComponent>(options);
+  auto node = std::make_shared<qrb_ros::imu::ImuComponent>(options);
   exec.add_node(node);
   while (rclcpp::ok() && node->is_working) {
     exec.spin_once();
