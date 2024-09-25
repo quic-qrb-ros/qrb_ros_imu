@@ -22,7 +22,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/in
 if(BUILD_TESTING)
 
   ament_auto_add_executable(sensor_client_test
-    test/src/${module}_test.cpp
+    test/src/sensor_client_test.cpp
   )
 
   target_link_libraries(sensor_client_test
