@@ -1,0 +1,75 @@
+name: Build test
+
+on:
+  workflow_dispatch:
+    inputs:
+      machine:
+        description: "Specifies the target device for which the image is built."
+        required: true
+        default: 'qcs6490-rb3gen2-vision-kit'
+        type: choice
+        options:
+          - qcs6490-rb3gen2-vision-kit
+          - qcs9100-ride-sx
+          - qcm6490-idp
+          - qcs6490-rb3gen2-core-kit
+          - sa8775p-ride-sx
+      distro:
+        description: "The short name of the distribution."
+        required: true
+        default: 'qcom-robotics-ros2-humble'
+        type: choice
+        options:
+          - qcom-robotics-ros2-humble
+          - qcom-robotics-ros2-jazzy
+          - qcom-wayland
+      build_override:
+        description: "QCOM build override"
+        required: true
+        default: 'custom'
+        type: choice
+        options:
+          - custom
+          - base
+
+jobs:
+  build-pr:
+    strategy:
+      fail-fast: true
+      matrix:
+        machine:
+          - qcm6490-idp
+          #- qcs6490-rb3gen2-core-kit
+          #- sa8775p-ride-sx
+    runs-on: [self-hosted, x86]
+    name: ${{ matrix.machine }}/poky/systemd
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compile
+        run: |
+          # Use this directory to cache things. You can do something
+          # like:
+          #    if [ ! -d ${persist_dir}/sdk ] ;
+          #       echo "Downloading sdk"
+          #       .....
+          #    fi
+          persist_dir=/srv/gh-runners/quic-qrb-ros
+
+          repo init -u https://github.com/quic-yocto/qcom-manifest -b qcom-linux-kirkstone -m qcom-6.6.38-QLI.1.2-Ver.1.1_robotics-product-sdk-1.1.xml
+          repo sync -c -j8
+
+          MACHINE=${{inputs.machine}} DISTRO=${{inputs.distro}} QCOM_SELECTED_BSP=${{inputs.build_override}} source setup-robotics-environment
+          ../qirp-build qcom-robotics-full-image
+
+
+          # quic-yocto uses Kas to build with:
+          # export DL_DIR=${persist_dir}/downloads
+          # export SSTATE_DIR=${persist_dir}/sstate-cache
+          # mkdir -p $DL_DIR
+          # mkdir -p $SSTATE_DIR
+          # mkdir build
+          # cd build
+          # kas build ../ci/${{ matrix.machine }}.yml
