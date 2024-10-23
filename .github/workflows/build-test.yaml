@@ -1,4 +1,5 @@
 name: Build test
+run-name: Build test by ${{github.event_name}}
 
 on:
   pull_request:
@@ -38,16 +39,49 @@ on:
           required: false
           type: string
           default: ''
+      deploy_sdk:
+        description: "Deploy generated SDK to persistent directory"
+        required: false
+        type: boolean
+        default: false
+
+env:
+  PERSIST_DIR: /srv/gh-runners/quic-qrb-ros
+  DL_DIR: /srv/gh-runners/quic-qrb-ros/downloads
+  MACHINE: ${{inputs.machine || 'qcs6490-rb3gen2-vision-kit'}}
+  DISTRO: ${{inputs.distro || 'qcom-robotics-ros2-humble'}}
+  QCOM_SELECTED_BSP: ${{inputs.build_override || 'custom'}}
+  DEPLOY_SDK: ${{github.event.inputs.deploy_sdk || 'false'}}
 
 jobs:
   build-pr:
     runs-on: [self-hosted, x86]
-    name: ${{inputs.machine}}.${{inputs.distro}}.${{inputs.build_override}}
+    timeout-minutes: 720
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          path: ${{github.event.repository.name}}
+
+      - name: Check and create work directories
+        run: |
+          if [ -e ${PERSIST_DIR} ] && [ -r ${PERSIST_DIR} ] && [ -w ${PERSIST_DIR} ];then
+            if [ ! -d ${DL_DIR} ];then
+              echo "Creating ${DL_DIR}!"
+              mkdir -p ${DL_DIR}
+            fi
+
+            if [ ! -d ${PERSIST_DIR}/sstate-cache-$DISTRO ];then
+              echo "Creating ${PERSIST_DIR}/sstate-cache-$DISTRO !"
+              mkdir -p ${PERSIST_DIR}/sstate-cache-$DISTRO
+            fi
+            echo "ls ${PERSIST_DIR}:"
+            ls ${PERSIST_DIR}/ -al
+          else
+            echo "DEPLOY_SDK=false" >> $GITHUB_ENV
+            echo ""persist_dir" is not available. Set DEPLOY_SDK=false."
+          fi
 
       - name: Sync source tree
         run: |
@@ -57,11 +91,46 @@ jobs:
       - name: Custom build
         if: ${{github.event.inputs.custom_build_cmd != ''}}
         run: |
-          MACHINE=${{inputs.machine}} DISTRO=${{inputs.distro}} QCOM_SELECTED_BSP=${{inputs.build_override}} source setup-robotics-environment
+          if [ -e ${DL_DIR} ] && [ -r ${DL_DIR} ] && [ -w ${DL_DIR} ];then
+            ln -s ${DL_DIR} ./downloads
+          fi
+          source setup-robotics-environment
           ${{github.event.inputs.custom_build_cmd}}
 
       - name: Full compilation
+        env:
+          BB_NUMBER_THREADS: 14
+
         if: ${{github.event.inputs.custom_build_cmd == ''}}
         run: |
-          MACHINE=${{inputs.machine}} DISTRO=${{inputs.distro}} QCOM_SELECTED_BSP=${{inputs.build_override}} source setup-robotics-environment
+          set -x
+          set +e
+          if [ -e ${DL_DIR} ] && [ -r ${DL_DIR} ] && [ -w ${DL_DIR} ];then
+            ln -s ${DL_DIR} ./downloads
+          fi
+
+          source setup-robotics-environment
           ../qirp-build qcom-robotics-full-image
+
+      - name: Deploy SDK
+        env:
+          SDK_DIR: ${PERSIST_DIR}/sdk-$MACHINE-$DISTRO
+        if: env.DEPLOY_SDK
+        run: |
+          if [ ! -d ${SDK_DIR} ];then
+            echo "Creating ${SDK_DIR}"
+            mkdir -p ${SDK_DIR}/
+            mkdir -p ${SDK_DIR}/.backup
+          fi
+
+          for file in ${SDK_DIR}/*;do
+            mv ${file} ${SDK_DIR}/.backup/
+          done
+
+          cp ${{ github.workspace }}/build-$DISTRO/tmp-glibc/deploy/sdk/*.sh ${SDK_DIR}
+
+          if [ $? == 0 ];then
+            rm ${SDK_DIR}/.backup/* -fr
+          else
+            mv ${SDK_DIR}/.backup/* ${SDK_DIR}
+          fi
