@@ -11,6 +11,25 @@ Please delete options that are not relevant.
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
 - [ ] This change requires a documentation update
 
+## Issue Number (if applicable)
+Issue Number
+
+## Version Update Suggestion
+- [ ] Yes
+- [ ] No
+
+## Document update commit
+If need update version, so need update Document Package, need commit id in Internal GitHub
+
+## Suggested New Version
+e.g., v1.2.3.4
+
+## Solution Approach
+Provide a brief description of the approach taken to resolve the issue or implement the feature.
+
+## Clang Format Verification:
+Confirm that the code passes local clang-format checks and adheres to the project's coding standards.
+
 ## How Has This Been Tested?
 
 Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce. Please also list any relevant details for your test configuration.
@@ -22,14 +41,3 @@ Please describe the tests that you ran to verify your changes. Provide instructi
 * OS version:
 * Hardware:
 * SDK:
-
-## Checklist:
-
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
-- [ ] Any dependent changes have been merged and published in downstream modules
