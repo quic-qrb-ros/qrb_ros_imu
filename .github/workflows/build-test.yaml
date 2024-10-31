@@ -2,8 +2,6 @@ name: Build test
 run-name: Build test by ${{github.event_name}}
 
 on:
-  pull_request:
-
   workflow_dispatch:
     inputs:
       machine:
@@ -104,7 +102,6 @@ jobs:
         if: ${{github.event.inputs.custom_build_cmd == ''}}
         run: |
           set -x
-          set +e
           if [ -e ${DL_DIR} ] && [ -r ${DL_DIR} ] && [ -w ${DL_DIR} ];then
             ln -s ${DL_DIR} ./downloads
           fi
@@ -113,10 +110,11 @@ jobs:
           ../qirp-build qcom-robotics-full-image
 
       - name: Deploy SDK
-        env:
-          SDK_DIR: ${PERSIST_DIR}/sdk-$MACHINE-$DISTRO
         if: env.DEPLOY_SDK
         run: |
+          export SDK_DIR=${PERSIST_DIR}/sdk-$MACHINE-$DISTRO
+          set -x
+          set +e
           if [ ! -d ${SDK_DIR} ];then
             echo "Creating ${SDK_DIR}"
             mkdir -p ${SDK_DIR}/
@@ -124,10 +122,15 @@ jobs:
           fi
 
           for file in ${SDK_DIR}/*;do
-            mv ${file} ${SDK_DIR}/.backup/
+            if [ -f "$file" ]; then
+              mv ${file} ${SDK_DIR}/.backup/
+            fi
           done
 
-          cp ${{ github.workspace }}/build-$DISTRO/tmp-glibc/deploy/sdk/*.sh ${SDK_DIR}
+          for file in ${{ github.workspace }}/build-$DISTRO/tmp-glibc/deploy/sdk/*.sh
+          do
+            cp ${file} ${SDK_DIR}
+          done
 
           if [ $? == 0 ];then
             rm ${SDK_DIR}/.backup/* -fr
