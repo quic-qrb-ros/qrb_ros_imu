@@ -28,6 +28,7 @@ jobs:
           #       .....
           #    fi
           persist_dir=/srv/gh-runners/quic-qrb-ros
+          echo test andy
 
           # quic-yocto uses Kas to build with:
           # export DL_DIR=${persist_dir}/downloads
