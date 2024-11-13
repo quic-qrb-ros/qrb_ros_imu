@@ -69,3 +69,26 @@ jobs:
             -DPYTHON_SOABI=cpython-310-aarch64-linux-gnu -DCMAKE_STAGING_PREFIX=$(pwd)/install \
             -DCMAKE_PREFIX_PATH=$(pwd)/install/share \
             -DBUILD_TESTING=OFF
+
+      - name: Publish artifacts
+        run: |
+          build_dir=${PERSIST_DIR}/builds/${GITHUB_RUN_ID}
+          mkdir -p $build_dir
+
+          # TODO - copy files from the "Compile" step above
+          # For now just make some fake files
+          echo "This is persistent 1" > ${build_dir}/example1.txt
+          echo "This is persistent 2" > ${build_dir}/example2.txt
+
+          # Instruct our file server to make these files available for download
+          url="https://quic-qrt-ros-fileserver-1029608027416.us-central1.run.app/${GITHUB_RUN_ID}/"
+
+          retries=3
+          for ((i=0; i<retries; i++)); do
+              curl -X POST -v ${url} && break
+              echo "something went wrong, sleep and retry"
+              sleep 2
+          done
+          (( retries == i )) && { echo 'Failed to publish artifacts'; exit 1; }
+
+          echo Artifacts available at: ${url}
