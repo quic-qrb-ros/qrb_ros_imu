@@ -13,7 +13,7 @@
   <depend>sensor_msgs</depend>
   <depend>rclcpp_components</depend>
   <depend>rcutils</depend>
-  <depend>qrb_ros_transport</depend>
+  <depend>qrb_ros_transport_imu_type</depend>
   <depend>qrb_sensor_client</depend>
 
   <export>

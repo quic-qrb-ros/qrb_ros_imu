@@ -7,7 +7,7 @@
 
 #include <thread>
 
-#include "qrb_ros_transport/type/imu.hpp"
+#include "qrb_ros_transport_imu_type/imu.hpp"
 #include "qrb_sensor_client/sensor_client.hpp"
 #include "rclcpp/rclcpp.hpp"
 

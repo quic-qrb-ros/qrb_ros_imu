@@ -8,7 +8,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <string>
 
-#include "qrb_ros_transport/type/imu.hpp"
+#include "qrb_ros_transport_imu_type/imu.hpp"
 
 namespace qrb_ros
 {

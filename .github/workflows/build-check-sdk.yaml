@@ -51,8 +51,6 @@ jobs:
           cd ${WORKSPACE}
           git clone https://github.com/quic-qrb-ros/lib_mem_dmabuf.git
           git clone https://github.com/quic-qrb-ros/qrb_ros_transport.git
-          cd qrb_ros_transport
-          git checkout 5d36172c87aaaaa95d9468549263af243c94b6da
 
       - name: build
         run: |
