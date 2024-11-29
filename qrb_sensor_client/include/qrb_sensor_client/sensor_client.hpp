@@ -23,10 +23,12 @@ namespace sensor_client
 class SensorClient
 {
 public:
-  bool GetImuData(sensors_event_t** accel_ptr, sensors_event_t** gyro_ptr, int32_t* sample_count);
+  bool GetImuData(sensors_event_t ** accel_ptr,
+      sensors_event_t ** gyro_ptr,
+      int32_t * sample_count);
   bool CreateConnection();
   void DisconnectServer();
-  int ReadMsg(char* buffer, int len);
+  int ReadMsg(char * buffer, int len);
 
 private:
   int _client_fd{ 0 };

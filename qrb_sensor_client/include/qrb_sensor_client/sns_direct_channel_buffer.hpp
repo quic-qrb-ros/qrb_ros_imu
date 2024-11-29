@@ -64,11 +64,12 @@ struct sensors
   int resampled;
   int sample_rate;
   int channel_type;
-  sensors()
-  {
-  }
-  sensors(std::string _sensor_type, int _calibrated, int _resampled, int _sample_rate,
-          int _channel_type)
+  sensors() {}
+  sensors(std::string _sensor_type,
+      int _calibrated,
+      int _resampled,
+      int _sample_rate,
+      int _channel_type)
   {
     sensor_type = _sensor_type;
     calibrated = _calibrated;

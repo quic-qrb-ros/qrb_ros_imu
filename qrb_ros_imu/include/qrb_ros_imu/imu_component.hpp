@@ -24,7 +24,7 @@ class ImuComponent : public rclcpp::Node
 {
 public:
   bool is_working;
-  explicit ImuComponent(const rclcpp::NodeOptions& options);
+  explicit ImuComponent(const rclcpp::NodeOptions & options);
   ~ImuComponent();
 
 private:

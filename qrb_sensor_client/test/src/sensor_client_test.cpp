@@ -19,8 +19,8 @@ int main()
     return -1;
   }
   int num = 0;
-  sensors_event_t* accel_ptr;
-  sensors_event_t* gyro_ptr;
+  sensors_event_t * accel_ptr;
+  sensors_event_t * gyro_ptr;
   sensors_event_t data_accel;
   sensors_event_t data_gyro;
 

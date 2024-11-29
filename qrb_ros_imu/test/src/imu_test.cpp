@@ -17,7 +17,7 @@ namespace imu
 class ImuListener : public rclcpp::Node
 {
 public:
-  explicit ImuListener(const rclcpp::NodeOptions& options) : Node("imu_test", options)
+  explicit ImuListener(const rclcpp::NodeOptions & options) : Node("imu_test", options)
   {
     auto callback = [this](const std::shared_ptr<const qrb_ros::transport::type::Imu> container) {
       long time_nanosec = (get_clock()->now()).nanoseconds();
@@ -45,7 +45,7 @@ private:
 }  // namespace imu
 }  // namespace qrb_ros
 
-int main(int argc, char* argv[])
+int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
 

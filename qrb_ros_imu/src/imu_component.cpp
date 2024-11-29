@@ -15,7 +15,7 @@ namespace qrb_ros
 {
 namespace imu
 {
-ImuComponent::ImuComponent(const rclcpp::NodeOptions& options) : Node("imu_node", options)
+ImuComponent::ImuComponent(const rclcpp::NodeOptions & options) : Node("imu_node", options)
 {
   retry_ = 0;
   running_ = false;
@@ -90,8 +90,8 @@ void ImuComponent::publish_msg()
 {
   int32_t pack_num = 0;
   int i = 0;
-  sensors_event_t* accel_ptr;
-  sensors_event_t* gyro_ptr;
+  sensors_event_t * accel_ptr;
+  sensors_event_t * gyro_ptr;
   long time_nanosec;
   long long latency_sum = 0;
 
@@ -108,10 +108,10 @@ void ImuComponent::publish_msg()
     }
     for (i = 0; i < pack_num; i++) {
       auto container = std::make_unique<qrb_ros::transport::type::Imu>();
-      std::shared_ptr<sensors_event_t> accel(accel_ptr, [](sensors_event_t* /* p */) {
+      std::shared_ptr<sensors_event_t> accel(accel_ptr, [](sensors_event_t * /* p */) {
         // due to use cycle buffer, no need to release
       });
-      std::shared_ptr<sensors_event_t> gyro(gyro_ptr, [](sensors_event_t* /* p */) {
+      std::shared_ptr<sensors_event_t> gyro(gyro_ptr, [](sensors_event_t * /* p */) {
         // due to use cycle buffer, no need to release
       });
       container->acceleration = accel;
