@@ -54,9 +54,7 @@ ros2 run qrb_ros_imu imu_node
     mkdir -p <qirp_decompressed_workspace>/qirp-sdk/ros_ws
     cd <qirp_decompressed_workspace>/qirp-sdk/ros_ws
 
-    git clone https://github.com/quic-qrb-ros/lib_mem_dmabuf.git
     git clone https://github.com/quic-qrb-ros/qrb_ros_imu.git
-    git clone https://github.com/quic-qrb-ros/qrb_ros_transport.git
     ```
 
 #### Build
